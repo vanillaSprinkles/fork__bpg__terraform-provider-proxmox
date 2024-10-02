@@ -31,10 +31,11 @@ clean:
 	rm -rf ./dist
 	rm -rf ./cache
 	rm -rf ./build
+	rm -f ./test-api-creds-auth/outs_cred-tester__expect_*
 
 .PHONY: build
 build:
-	mkdir -p "$(TERRAFORM_PLUGIN_OUTPUT_DIRECTORY)"
+	mkdir -p "$(TERRAFORM_PLUGIN_OUTPUT_DIRECTORY)" "$(TERRAFORM_PLUGIN_CACHE_DIRECTORY)"
 	rm -f "$(TERRAFORM_PLUGIN_EXECUTABLE)"
 	go build -o "$(TERRAFORM_PLUGIN_EXECUTABLE)"
 
@@ -79,6 +80,15 @@ example-plan:
 		&& export TF_PLUGIN_CACHE_DIR="$(TERRAFORM_PLUGIN_CACHE_DIRECTORY)" \
 		&& cd ./example \
 		&& $(TERRAFORM_EXECUTABLE) plan
+
+.PHONY: test-api-creds-auth
+test-api-creds-auth:
+	rm -f ./test-api-creds-auth/outs_cred-tester__expect_*
+	export TF_CLI_CONFIG_FILE="$(shell pwd -P)/example.tfrc" \
+		&& export TF_DISABLE_CHECKPOINT="true" \
+		&& export TF_PLUGIN_CACHE_DIR="$(TERRAFORM_PLUGIN_CACHE_DIRECTORY)" \
+		&& cd ./test-api-creds-auth \
+		&& ./api-creds-tester.sh $(TERRAFORM_EXECUTABLE)
 
 .PHONY: fmt
 fmt:
